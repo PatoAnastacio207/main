@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Articles</title>
+</head>
+<body>
+
+<a href="/">&larr; Back to home</a>
+
+<h1>Articles</h1>
+
+{% if request.user.is_staff %}
+    <a href="{% url 'blog_create' %}">+ New Article</a>
+{% endif %}
+
+{% if articles %}
+    {% for article in articles %}
+        <div>
+            <h2><a href="{% url 'blog_detail' article.pk %}">{{ article.title }}</a></h2>
+            <p>{{ article.date }} &mdash; {{ article.author }}</p>
+            <p>{{ article.summary }}</p>
+            <p>
+                {% for kw in article.keywords_list %}
+                    <span>{{ kw }}</span>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+        </div>
+        <hr>
+    {% endfor %}
+{% else %}
+    <p>No articles published yet.</p>
+{% endif %}
+
+</body>
+</html>

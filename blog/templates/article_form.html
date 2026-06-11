@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>New Article</title>
+    </head>
+    <body>
+        <a href="{% url 'article_list' %}">&larr; Back to articles</a>
+
+        <h1>New Article</h1>
+
+        {% if messages %} {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %} {% endif %}
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %} {{ form.as_p }}
+            <button type="submit">Save Article</button>
+        </form>
+    </body>
+</html>

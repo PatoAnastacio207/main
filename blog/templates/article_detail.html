@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>{{ article.title }}</title>
+    </head>
+    <body>
+        <a href="{% url 'article_list' %}">&larr; Back to articles</a>
+
+        <h1>{{ article.title }}</h1>
+        <p>{{ article.date }} &mdash; {{ article.author }}</p>
+
+        {% if article.title_img %}
+        <img src="{{ article.title_img.url }}" alt="{{ article.title }}" />
+        {% endif %}
+
+        <p><em>{{ article.summary }}</em></p>
+
+        <hr />
+
+        <div>{{ article.content|safe }}</div>
+
+        <hr />
+
+        <p>
+            Keywords: {% for kw in article.keywords_list %}
+            <span>{{ kw }}</span>{% if not forloop.last %}<span>,</span>
+            {% endif %} {% endfor %}
+        </p>
+    </body>
+</html>
