@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Calidad de aire</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+
+<body>
+    <h1>Calidad de aire (SPS30)</h1>
+    <h2>Ultima lectura</h2>
+    <p id="reading">Esperando la informacion live...</p>
+    <p>Fecha de la lectura: <small id="timestamp">NULL</small></p>
+    <h2>Grafico PM</h2>
+    <canvas id="pmGraph" height="150"></canvas>
+
+    <h2>Grafico NC</h2>
+    <canvas id="ncGraph" height="150"></canvas>
+
+
+    <h2>Grafico NC vs PM</h2>
+    <canvas id="ncPmGraph" height="150"></canvas>
+
+    <script>
+        // DRAW PM GRAPH
+        (async () => {
+            const res = await fetch("{% url 'sensors:pm' %}");
+            const data = await res.json();
+
+            new Chart(document.getElementById('pmGraph'), {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [
+                        {
+                            label: 'PM1',
+                            data: data.pm1,
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            tension: 0.3,
+                            pointRadius: 2,
+                        },
+                        {
+                            label: 'PM2.5',
+                            data: data.pm25,
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            tension: 0.3,
+                            pointRadius: 2,
+                        },
+                        {
+                            label: 'PM4',
+                            data: data.pm4,
+                            borderColor: 'rgba(255, 206, 86, 1)',
+                            backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                            tension: 0.3,
+                            pointRadius: 2,
+                        },
+                        {
+                            label: 'PM10',
+                            data: data.pm10,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.3,
+                            pointRadius: 2,
+                        },
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Time' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Particle Count' },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        })();
+
+        // DRAW NC GRAPH
+        (async () => {
+            const res = await fetch("{% url 'sensors:nc' %}");
+            const data = await res.json();
+
+            new Chart(document.getElementById('ncGraph'), {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [
+                        {
+                            label: 'NC0',
+                            data: data.nc0,
+                            borderColor: 'rgba(0, 0, 256, 1)',
+                            backgroundColor: 'rgba(0, 0, 256, 0.2)',
+                            tension: 0.3,
+                            pointRadius: 2,
+                        },
+                        {
+                            label: 'NC1',
+                            data: data.nc1,
+                            borderColor: 'rgba(0, 256, 0, 1)',
+                            backgroundColor: 'rgba(0, 256, 0, 0.2)',
+                            tension: 0.3,
+                            pointRadius: 2,
+                        },
+                        {
+                            label: 'NC2.5',
+                            data: data.nc25,
+                            borderColor: 'rgba(256, 256, 0, 1)',
+                            backgroundColor: 'rgba(256, 256, 0, 0.2)',
+                            tension: 0.3,
+                            pointRadius: 2,
+                        },
+                        {
+                            label: 'NC4',
+                            data: data.nc4,
+                            borderColor: 'rgba(256, 0, 256, 1)',
+                            backgroundColor: 'rgba(256, 0, 256, 0.2)',
+                            tension: 0.3,
+                            pointRadius: 2,
+                        },
+                        {
+                            label: 'NC10',
+                            data: data.nc10,
+                            borderColor: 'rgba(0, 256, 256, 1)',
+                            backgroundColor: 'rgba(0, 256, 256, 0.2)',
+                            tension: 0.3,
+                            pointRadius: 2,
+                        },
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Time' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Particle Count' },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        })();
+
+        // DRAW nc vs pm graph
+        (async () => {
+            const res = await fetch("{% url 'sensors:nc_pm' %}");
+            const data = await res.json();
+
+            new Chart(document.getElementById('ncPmGraph'), {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [
+                        // PM values → left axis
+                        {
+                            label: 'PM1',
+                            data: data.pm1,
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            tension: 0.3,
+                            pointRadius: 2,
+                            yAxisID: 'y',
+                        },
+                        {
+                            label: 'PM2.5',
+                            data: data.pm25,
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            tension: 0.3,
+                            pointRadius: 2,
+                            yAxisID: 'y',
+                        },
+                        // NC values → right axis
+                        {
+                            label: 'NC0.5',
+                            data: data.nc0,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.3,
+                            pointRadius: 2,
+                            borderDash: [4, 3],
+                            yAxisID: 'y1',
+                        },
+                        {
+                            label: 'NC1.0',
+                            data: data.nc1,
+                            borderColor: 'rgba(153, 102, 255, 1)',
+                            backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                            tension: 0.3,
+                            pointRadius: 2,
+                            borderDash: [4, 3],
+                            yAxisID: 'y1',
+                        },
+                        {
+                            label: 'NC2.5',
+                            data: data.nc25,
+                            borderColor: 'rgba(255, 159, 64, 1)',
+                            backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                            tension: 0.3,
+                            pointRadius: 2,
+                            borderDash: [4, 3],
+                            yAxisID: 'y1',
+                        },
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Time' }
+                        },
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            title: { display: true, text: 'PM (µg/m³)' },
+                            beginAtZero: true,
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            title: { display: true, text: 'NC (#/cm³)' },
+                            beginAtZero: true,
+                            grid: {
+                                drawOnChartArea: false, // avoids overlapping gridlines with left axis
+                            },
+                        },
+                    }
+                }
+            });
+        })();
+
+        async function fetchReading() {
+            try {
+                const res = await fetch("{% url 'sensors:latest' %}");
+                const data = await res.json();
+                if (data.error) {
+                    document.getElementById("reading").textContent = data.error;
+                } else if (data.value !== null) {
+                    document.getElementById("reading").textContent = data.value;
+                    document.getElementById("timestamp").textContent =
+                        new Date(data.timestamp * 1000).toLocaleTimeString();
+                }
+            } catch (e) {
+                document.getElementById("reading").textContent = "Error fetching data";
+            }
+        }
+        fetchReading();
+        setInterval(fetchReading, 60000);
+    </script>
+</body>
+
+</html>
