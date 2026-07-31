@@ -6,6 +6,11 @@ __pycache__
 db.sqlite3
 media
 bin/
+lib64/*
+lib/*
+bin/*
+.venv/*
+
 
 # Backup files #
 *.bak

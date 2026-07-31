@@ -1,0 +1,18 @@
+# Core runtime for the Django app
+Django==6.0.5
+bleach==6.3.0
+django-redis==7.0.0
+pyserial==3.5
+redis==8.0.1
+Pillow==12.2.0
+
+# Compatibility helpers already present in the project environment
+asgiref==3.11.1
+future==1.0.0
+sqlparse==0.5.5
+pytz==2026.3.post1
+PyYAML==6.0.3
+DateTime==6.0
+iso8601==2.1.0
+webencodings==0.5.1
+zope.interface==8.5
