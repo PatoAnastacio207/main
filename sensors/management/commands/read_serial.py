@@ -20,13 +20,11 @@ class Command(BaseCommand):
         if not line.startswith(DATA_PREFIX):
             return None
 
-        print("passes DATA_PREFIX")
-
         parts = line.split(",")
         if len(parts) != 11:
             return None
 
-        _, pm1, pm25, pm4, pm10, nc0, nc1, nc25, nc4, nc10, typicalParticleSize = parts
+        _, pm1, pm25, pm4, pm10, nc0, nc1, nc25, nc4, nc10, typical_particle_size = parts
         return {
             "pm1": pm1,
             "pm25": pm25,
@@ -37,7 +35,7 @@ class Command(BaseCommand):
             "nc25": nc25,
             "nc4": nc4,
             "nc10": nc10,
-            "typicalParticleSize": typicalParticleSize,
+            "typical_particle_size": typical_particle_size,
             "timestamp": timezone.now(),
         }
 
@@ -85,7 +83,7 @@ class Command(BaseCommand):
                 nc25=payload["nc25"],
                 nc4=payload["nc4"],
                 nc10=payload["nc10"],
-                typicalParticleSize=payload["typicalParticleSize"],
+                typical_particle_size=payload["typical_particle_size"],
                 timestamp=payload["timestamp"],
             )
         except Exception as e:
@@ -121,7 +119,6 @@ class Command(BaseCommand):
                 continue
 
             payload = self.parse_sps30_line(line)
-            print(line)
             if payload is None:
                 self.stderr.write(self.style.ERROR("Could not parse SPS30 payload."))
                 continue

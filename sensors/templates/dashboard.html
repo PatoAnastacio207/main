@@ -3,35 +3,293 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Calidad de aire</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+        :root {
+            --bg: #0f1420;
+            --surface: #171e2e;
+            --surface-alt: #1e2740;
+            --border: #2a3450;
+            --text: #e8ecf6;
+            --text-dim: #93a0bd;
+            --accent: #5b9dff;
+            --ok: #4ade80;
+            --warn: #facc15;
+            --bad: #f87171;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        h1 {
+            margin: 0 0 4px;
+            font-size: 1.6rem;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            margin: 0 0 24px;
+            font-size: 0.9rem;
+        }
+
+        .subtitle span {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        h2 {
+            font-size: 1.05rem;
+            margin: 0 0 14px;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        section {
+            margin-bottom: 32px;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 16px;
+        }
+
+        .stat-card .label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 6px;
+        }
+
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .stat-card .unit {
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: var(--text-dim);
+            margin-left: 4px;
+        }
+
+        .status-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+
+        .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--text-dim);
+            flex-shrink: 0;
+        }
+
+        .dot.ok {
+            background: var(--ok);
+            box-shadow: 0 0 6px var(--ok);
+        }
+
+        .dot.bad {
+            background: var(--bad);
+            box-shadow: 0 0 6px var(--bad);
+        }
+
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: end;
+            gap: 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+        }
+
+        .filter-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .filter-field label {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .filter-field input[type="date"] {
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 10px;
+            color: var(--text);
+            font-size: 0.9rem;
+            color-scheme: dark;
+        }
+
+        .filter-bar button {
+            background: var(--accent);
+            border: none;
+            border-radius: 8px;
+            padding: 9px 16px;
+            color: #0f1420;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .filter-bar button:hover {
+            filter: brightness(1.08);
+        }
+
+        .filter-bar .presets {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar .presets button {
+            background: var(--surface-alt);
+            color: var(--text);
+            border: 1px solid var(--border);
+            font-weight: 500;
+        }
+
+        .filter-bar .presets button.active {
+            background: var(--accent);
+            color: #0f1420;
+            border-color: var(--accent);
+        }
+
+        .filter-hint {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            width: 100%;
+        }
+
+        .graphs {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 860px) {
+            .graphs {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .graph-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 20px;
+        }
+
+        .chart-wrap {
+            position: relative;
+            height: 320px;
+        }
+
+        .chart-wrap canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .error-text {
+            color: var(--bad);
+        }
+    </style>
 </head>
 
 <body>
     <h1>Calidad de aire (SPS30)</h1>
+    <p class="subtitle">Última actualización: <span id="timestamp">--</span></p>
 
-    <h2>SPS30: </h2>
-    <p id="sps_reading">Esperando la informacion</p>
+    <section>
+        <h2>Lectura actual del SPS30</h2>
+        <div id="sps_stats" class="stat-grid"></div>
+        <div class="status-line"><span id="sps_status_dot" class="dot"></span><span id="sps_status_text">Esperando la información</span></div>
+    </section>
 
-    <h2>Condiciones atmosfericas: </h2>
-    <p id="weather_reading">Esperando la informacion</p>
+    <section>
+        <h2>Condiciones atmosféricas</h2>
+        <div id="weather_stats" class="stat-grid"></div>
+        <div class="status-line"><span id="weather_status_dot" class="dot"></span><span id="weather_status_text">Esperando la información</span></div>
+    </section>
 
-    <p>Fecha de la lectura: <small id="timestamp">NULL</small></p>
+    <section>
+        <h2>Rango de fechas</h2>
+        <div class="filter-bar">
+            <div class="filter-field">
+                <label for="startDate">Desde</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="filter-field">
+                <label for="endDate">Hasta</label>
+                <input type="date" id="endDate">
+            </div>
+            <button id="applyRange" type="button">Aplicar</button>
+            <div class="presets" id="rangePresets">
+                <button type="button" data-days="1">Último día con datos</button>
+                <button type="button" data-days="7">Última semana con datos</button>
+                <button type="button" data-days="0">Todo</button>
+            </div>
+            <p class="filter-hint" id="rangeHint">Cargando rango disponible…</p>
+        </div>
+    </section>
 
-    <h2>Grafico PM</h2>
-    <canvas id="pmGraph" height="150"></canvas>
-
-    <h2>Grafico NC</h2>
-    <canvas id="ncGraph" height="150"></canvas>
-
-
-    <h2>Grafico NC vs PM</h2>
-    <canvas id="ncPmGraph" height="150"></canvas>
-
-    <h2>Grafico de temperatura y humedad</h2>
-    <canvas id="weatherGraph" height="150"></canvas>
+    <section class="graphs">
+        <div class="graph-card">
+            <h2>Material particulado (PM)</h2>
+            <div class="chart-wrap"><canvas id="pmGraph"></canvas></div>
+        </div>
+        <div class="graph-card">
+            <h2>Conteo de partículas (NC)</h2>
+            <div class="chart-wrap"><canvas id="ncGraph"></canvas></div>
+        </div>
+        <div class="graph-card">
+            <h2>NC vs PM</h2>
+            <div class="chart-wrap"><canvas id="ncPmGraph"></canvas></div>
+        </div>
+        <div class="graph-card">
+            <h2>Temperatura y humedad</h2>
+            <div class="chart-wrap"><canvas id="weatherGraph"></canvas></div>
+        </div>
+    </section>
 
     <script>
+        Chart.defaults.color = '#93a0bd';
+        Chart.defaults.borderColor = '#2a3450';
+        Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+
         let pmChart = null;
         let ncChart = null;
         let ncPmChart = null;
@@ -44,9 +302,23 @@
             return chartFactory();
         }
 
+        function statCard(label, value, unit) {
+            return `<div class="stat-card"><div class="label">${label}</div><div class="value">${value}<span class="unit">${unit}</span></div></div>`;
+        }
+
+        function rangeQuery() {
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value;
+            const params = new URLSearchParams();
+            if (start) params.set('start', start);
+            if (end) params.set('end', end);
+            const qs = params.toString();
+            return qs ? `?${qs}` : '';
+        }
+
         // DRAW PM GRAPH
         async function drawPm() {
-            const res = await fetch("{% url 'sensors:pm' %}");
+            const res = await fetch("{% url 'sensors:pm' %}" + rangeQuery());
             const data = await res.json();
 
             pmChart = resetChart(pmChart, () => new Chart(document.getElementById('pmGraph'), {
@@ -90,13 +362,16 @@
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         x: {
-                            title: { display: true, text: 'Time' }
+                            title: { display: true, text: 'Tiempo' },
+                            grid: { color: '#1e2740' }
                         },
                         y: {
-                            title: { display: true, text: 'Particle Count' },
-                            beginAtZero: true
+                            title: { display: true, text: 'Concentración (µg/m³)' },
+                            beginAtZero: true,
+                            grid: { color: '#1e2740' }
                         }
                     }
                 }
@@ -105,7 +380,7 @@
 
         // DRAW NC GRAPH
         async function drawNc() {
-            const res = await fetch("{% url 'sensors:nc' %}");
+            const res = await fetch("{% url 'sensors:nc' %}" + rangeQuery());
             const data = await res.json();
 
             ncChart = resetChart(ncChart, () => new Chart(document.getElementById('ncGraph'), {
@@ -114,42 +389,34 @@
                     labels: data.labels,
                     datasets: [
                         {
-                            label: 'NC0',
+                            label: 'NC0.5',
                             data: data.nc0,
-                            borderColor: 'rgba(0, 0, 256, 1)',
-                            backgroundColor: 'rgba(0, 0, 256, 0.2)',
+                            borderColor: 'rgba(91, 157, 255, 1)',
+                            backgroundColor: 'rgba(91, 157, 255, 0.2)',
                             tension: 0.3,
                             pointRadius: 2,
                         },
                         {
                             label: 'NC1',
                             data: data.nc1,
-                            borderColor: 'rgba(0, 256, 0, 1)',
-                            backgroundColor: 'rgba(0, 256, 0, 0.2)',
+                            borderColor: 'rgba(74, 222, 128, 1)',
+                            backgroundColor: 'rgba(74, 222, 128, 0.2)',
                             tension: 0.3,
                             pointRadius: 2,
                         },
                         {
                             label: 'NC2.5',
                             data: data.nc25,
-                            borderColor: 'rgba(256, 256, 0, 1)',
-                            backgroundColor: 'rgba(256, 256, 0, 0.2)',
-                            tension: 0.3,
-                            pointRadius: 2,
-                        },
-                        {
-                            label: 'NC4',
-                            data: data.nc4,
-                            borderColor: 'rgba(256, 0, 256, 1)',
-                            backgroundColor: 'rgba(256, 0, 256, 0.2)',
+                            borderColor: 'rgba(250, 204, 21, 1)',
+                            backgroundColor: 'rgba(250, 204, 21, 0.2)',
                             tension: 0.3,
                             pointRadius: 2,
                         },
                         {
                             label: 'NC10',
                             data: data.nc10,
-                            borderColor: 'rgba(0, 256, 256, 1)',
-                            backgroundColor: 'rgba(0, 256, 256, 0.2)',
+                            borderColor: 'rgba(248, 113, 113, 1)',
+                            backgroundColor: 'rgba(248, 113, 113, 0.2)',
                             tension: 0.3,
                             pointRadius: 2,
                         },
@@ -157,13 +424,16 @@
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         x: {
-                            title: { display: true, text: 'Time' }
+                            title: { display: true, text: 'Tiempo' },
+                            grid: { color: '#1e2740' }
                         },
                         y: {
-                            title: { display: true, text: 'Particle Count' },
-                            beginAtZero: true
+                            title: { display: true, text: 'Conteo de partículas (#/cm³)' },
+                            beginAtZero: true,
+                            grid: { color: '#1e2740' }
                         }
                     }
                 }
@@ -172,7 +442,7 @@
 
         // DRAW nc vs pm graph
         async function drawNcVsPm() {
-            const res = await fetch("{% url 'sensors:nc_pm' %}");
+            const res = await fetch("{% url 'sensors:nc_pm' %}" + rangeQuery());
             const data = await res.json();
 
             ncPmChart = resetChart(ncPmChart, () => new Chart(document.getElementById('ncPmGraph'), {
@@ -234,19 +504,22 @@
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     interaction: {
                         mode: 'index',
                         intersect: false,
                     },
                     scales: {
                         x: {
-                            title: { display: true, text: 'Time' }
+                            title: { display: true, text: 'Tiempo' },
+                            grid: { color: '#1e2740' }
                         },
                         y: {
                             type: 'linear',
                             position: 'left',
                             title: { display: true, text: 'PM (µg/m³)' },
                             beginAtZero: true,
+                            grid: { color: '#1e2740' }
                         },
                         y1: {
                             type: 'linear',
@@ -263,7 +536,7 @@
         };
 
         async function drawWeather() {
-            const res = await fetch("{% url 'sensors:weather_graph' %}");
+            const res = await fetch("{% url 'sensors:weather_graph' %}" + rangeQuery());
             const data = await res.json();
 
             weatherChart = resetChart(weatherChart, () => new Chart(document.getElementById('weatherGraph'), {
@@ -293,19 +566,22 @@
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     interaction: {
                         mode: 'index',
                         intersect: false,
                     },
                     scales: {
                         x: {
-                            title: { display: true, text: 'Time' }
+                            title: { display: true, text: 'Tiempo' },
+                            grid: { color: '#1e2740' }
                         },
                         y: {
                             type: 'linear',
                             position: 'left',
                             title: { display: true, text: 'Temperatura (°C)' },
                             beginAtZero: false,
+                            grid: { color: '#1e2740' }
                         },
                         y1: {
                             type: 'linear',
@@ -323,45 +599,150 @@
 
         // GET LATEST SPS READING
         async function getSpsFromCache() {
+            const dot = document.getElementById('sps_status_dot');
+            const statusText = document.getElementById('sps_status_text');
+            const statsBox = document.getElementById('sps_stats');
             try {
                 const res = await fetch("{% url 'sensors:latest_sps' %}");
                 const data = await res.json();
-                if (data.error) {
-                    document.getElementById("sps_reading").textContent = data.error;
-                } else if (data.value !== null) {
-                    document.getElementById("sps_reading").textContent = data.value;
-                    document.getElementById("timestamp").textContent =
-                        new Date(data.timestamp * 1000).toLocaleTimeString();
+                if (!res.ok || data.error) {
+                    dot.className = 'dot bad';
+                    statusText.textContent = data.error || 'Sin datos disponibles';
+                    statsBox.innerHTML = '';
+                    return;
+                }
+                if (data.value !== null) {
+                    const parts = data.value.replace('DATA,', '').split(',');
+                    const [pm1, pm25, pm4, pm10, nc0, nc1, nc25, nc4, nc10, size] = parts;
+                    statsBox.innerHTML = [
+                        statCard('PM1', pm1, 'µg/m³'),
+                        statCard('PM2.5', pm25, 'µg/m³'),
+                        statCard('PM4', pm4, 'µg/m³'),
+                        statCard('PM10', pm10, 'µg/m³'),
+                        statCard('NC0.5', nc0, '#/cm³'),
+                        statCard('NC1', nc1, '#/cm³'),
+                        statCard('NC2.5', nc25, '#/cm³'),
+                        statCard('NC4', nc4, '#/cm³'),
+                        statCard('NC10', nc10, '#/cm³'),
+                        statCard('Tamaño típico', size, 'µm'),
+                    ].join('');
+                    dot.className = 'dot ok';
+                    statusText.textContent = 'Conectado';
+                    document.getElementById('timestamp').textContent =
+                        new Date(data.timestamp * 1000).toLocaleString('es-ES');
                 }
             } catch (e) {
-                document.getElementById("sps_reading").textContent = "Error fetching data";
+                dot.className = 'dot bad';
+                statusText.textContent = 'Error al obtener los datos';
             }
         }
 
         async function getWeatherFromCache() {
+            const dot = document.getElementById('weather_status_dot');
+            const statusText = document.getElementById('weather_status_text');
+            const statsBox = document.getElementById('weather_stats');
             try {
                 const res = await fetch("{% url 'sensors:latest_weather' %}");
                 const data = await res.json();
-                if (data.error) {
-                    document.getElementById("weather_reading").textContent = data.error;
-                } else if (data.value !== null) {
-                    document.getElementById("weather_reading").textContent = data.value;
+                if (!res.ok || data.error) {
+                    dot.className = 'dot bad';
+                    statusText.textContent = data.error || 'Sin datos disponibles';
+                    statsBox.innerHTML = '';
+                    return;
+                }
+                if (data.value !== null) {
+                    const parts = data.value.split(',');
+                    const [, temperature, humidity, pressure, windDirection, windSpeed] = parts;
+                    statsBox.innerHTML = [
+                        statCard('Temperatura', temperature ?? '--', '°C'),
+                        statCard('Humedad', humidity ?? '--', '%'),
+                        statCard('Presión', pressure ?? '--', 'hPa'),
+                        statCard('Dirección viento', windDirection ?? '--', '°'),
+                        statCard('Velocidad viento', windSpeed ?? '--', 'm/s'),
+                    ].join('');
+                    dot.className = 'dot ok';
+                    statusText.textContent = 'Conectado';
                 }
             } catch (e) {
-                document.getElementById("weather_reading").textContent = "Error fetching data";
+                dot.className = 'dot bad';
+                statusText.textContent = 'Error al obtener los datos';
             }
         }
 
-        async function fetchReading() {
-            await getSpsFromCache();
-            await getWeatherFromCache();
+        async function refreshGraphs() {
             await drawPm();
             await drawNc();
             await drawNcVsPm();
             await drawWeather();
         }
-        fetchReading();
-        setInterval(fetchReading, 12000);
+
+        async function fetchReading() {
+            await getSpsFromCache();
+            await getWeatherFromCache();
+            await refreshGraphs();
+        }
+
+        function toIsoDate(date) {
+            return date.toISOString().slice(0, 10);
+        }
+
+        function setActivePreset(days) {
+            document.querySelectorAll('#rangePresets button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.days === String(days));
+            });
+        }
+
+        function applyPreset(days, rangeMin, rangeMax) {
+            const maxDate = new Date(rangeMax + 'T00:00:00');
+            const minDate = new Date(rangeMin + 'T00:00:00');
+            let startDate = minDate;
+            if (days > 0) {
+                startDate = new Date(maxDate);
+                startDate.setDate(startDate.getDate() - (days - 1));
+                if (startDate < minDate) startDate = minDate;
+            }
+            document.getElementById('startDate').value = toIsoDate(startDate);
+            document.getElementById('endDate').value = rangeMax;
+            setActivePreset(days);
+            refreshGraphs();
+        }
+
+        async function initRangeFilter() {
+            const hint = document.getElementById('rangeHint');
+            try {
+                const res = await fetch("{% url 'sensors:available_range' %}");
+                const data = await res.json();
+
+                if (!data.min || !data.max) {
+                    hint.textContent = 'No hay datos históricos disponibles todavía.';
+                    return;
+                }
+
+                document.getElementById('startDate').min = data.min;
+                document.getElementById('startDate').max = data.max;
+                document.getElementById('endDate').min = data.min;
+                document.getElementById('endDate').max = data.max;
+                hint.textContent = `Datos disponibles entre ${data.min} y ${data.max}.`;
+
+                document.getElementById('rangePresets').querySelectorAll('button').forEach(btn => {
+                    btn.addEventListener('click', () => applyPreset(Number(btn.dataset.days), data.min, data.max));
+                });
+                document.getElementById('applyRange').addEventListener('click', () => {
+                    setActivePreset(-1);
+                    refreshGraphs();
+                });
+
+                applyPreset(1, data.min, data.max);
+            } catch (e) {
+                hint.textContent = 'No se pudo cargar el rango de fechas disponible.';
+            }
+        }
+
+        (async function start() {
+            await initRangeFilter();
+            await fetchReading();
+            setInterval(fetchReading, 12000);
+        })();
     </script>
 </body>
 

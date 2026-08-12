@@ -47,6 +47,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+# Shared secret that remote sensor devices (e.g. an ESP32) must send in the
+# X-Api-Key header when POSTing readings to the sensors HTTP ingest endpoint.
+SENSOR_API_KEY = os.getenv("SENSOR_API_KEY", "")
+
 
 # Application definition
 
