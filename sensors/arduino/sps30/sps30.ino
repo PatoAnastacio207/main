@@ -39,6 +39,7 @@ void setup() {
 }
 
 void loop() {
+    delay(12000);
 
     uint16_t dataReadyFlag = 0;
     uint16_t mc1p0 = 0;
@@ -88,15 +89,14 @@ void loop() {
     Serial.print(typicalParticleSize);
     Serial.println();
 
-    Serial.print("0"); Serial.println();
-    delay(60000);
-    Serial.print("1"); Serial.println();
-    delay(60000);
-    Serial.print("2"); Serial.println();
-    delay(60000);
-    Serial.print("3"); Serial.println();
-    delay(60000);
-    Serial.print("4"); Serial.println();
-    delay(60000);
-    Serial.print("5"); Serial.println();
+    // Serial.print("0"); Serial.println();
+    // Serial.print("1"); Serial.println();
+    // delay(60000);
+    // Serial.print("2"); Serial.println();
+    // delay(60000);
+    // Serial.print("3"); Serial.println();
+    // delay(60000);
+    // Serial.print("4"); Serial.println();
+    // delay(60000);
+    // Serial.print("5"); Serial.println();
 }

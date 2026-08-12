@@ -9,9 +9,15 @@
 
 <body>
     <h1>Calidad de aire (SPS30)</h1>
-    <h2>Ultima lectura</h2>
-    <p id="reading">Esperando la informacion live...</p>
+
+    <h2>SPS30: </h2>
+    <p id="sps_reading">Esperando la informacion</p>
+
+    <h2>Condiciones atmosfericas: </h2>
+    <p id="weather_reading">Esperando la informacion</p>
+
     <p>Fecha de la lectura: <small id="timestamp">NULL</small></p>
+
     <h2>Grafico PM</h2>
     <canvas id="pmGraph" height="150"></canvas>
 
@@ -22,13 +28,28 @@
     <h2>Grafico NC vs PM</h2>
     <canvas id="ncPmGraph" height="150"></canvas>
 
+    <h2>Grafico de temperatura y humedad</h2>
+    <canvas id="weatherGraph" height="150"></canvas>
+
     <script>
+        let pmChart = null;
+        let ncChart = null;
+        let ncPmChart = null;
+        let weatherChart = null;
+
+        function resetChart(currentChart, chartFactory) {
+            if (currentChart) {
+                currentChart.destroy();
+            }
+            return chartFactory();
+        }
+
         // DRAW PM GRAPH
-        (async () => {
+        async function drawPm() {
             const res = await fetch("{% url 'sensors:pm' %}");
             const data = await res.json();
 
-            new Chart(document.getElementById('pmGraph'), {
+            pmChart = resetChart(pmChart, () => new Chart(document.getElementById('pmGraph'), {
                 type: 'line',
                 data: {
                     labels: data.labels,
@@ -79,15 +100,15 @@
                         }
                     }
                 }
-            });
-        })();
+            }));
+        };
 
         // DRAW NC GRAPH
-        (async () => {
+        async function drawNc() {
             const res = await fetch("{% url 'sensors:nc' %}");
             const data = await res.json();
 
-            new Chart(document.getElementById('ncGraph'), {
+            ncChart = resetChart(ncChart, () => new Chart(document.getElementById('ncGraph'), {
                 type: 'line',
                 data: {
                     labels: data.labels,
@@ -146,15 +167,15 @@
                         }
                     }
                 }
-            });
-        })();
+            }));
+        };
 
         // DRAW nc vs pm graph
-        (async () => {
+        async function drawNcVsPm() {
             const res = await fetch("{% url 'sensors:nc_pm' %}");
             const data = await res.json();
 
-            new Chart(document.getElementById('ncPmGraph'), {
+            ncPmChart = resetChart(ncPmChart, () => new Chart(document.getElementById('ncPmGraph'), {
                 type: 'line',
                 data: {
                     labels: data.labels,
@@ -238,26 +259,109 @@
                         },
                     }
                 }
-            });
-        })();
+            }));
+        };
 
-        async function fetchReading() {
+        async function drawWeather() {
+            const res = await fetch("{% url 'sensors:weather_graph' %}");
+            const data = await res.json();
+
+            weatherChart = resetChart(weatherChart, () => new Chart(document.getElementById('weatherGraph'), {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [
+                        {
+                            label: 'Temperatura (°C)',
+                            data: data.temperature,
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            tension: 0.3,
+                            pointRadius: 2,
+                            yAxisID: 'y',
+                        },
+                        {
+                            label: 'Humedad (%)',
+                            data: data.humidity,
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            tension: 0.3,
+                            pointRadius: 2,
+                            yAxisID: 'y1',
+                        },
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Time' }
+                        },
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            title: { display: true, text: 'Temperatura (°C)' },
+                            beginAtZero: false,
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            title: { display: true, text: 'Humedad (%)' },
+                            beginAtZero: false,
+                            grid: {
+                                drawOnChartArea: false,
+                            },
+                        },
+                    }
+                }
+            }));
+        }
+
+        // GET LATEST SPS READING
+        async function getSpsFromCache() {
             try {
-                const res = await fetch("{% url 'sensors:latest' %}");
+                const res = await fetch("{% url 'sensors:latest_sps' %}");
                 const data = await res.json();
                 if (data.error) {
-                    document.getElementById("reading").textContent = data.error;
+                    document.getElementById("sps_reading").textContent = data.error;
                 } else if (data.value !== null) {
-                    document.getElementById("reading").textContent = data.value;
+                    document.getElementById("sps_reading").textContent = data.value;
                     document.getElementById("timestamp").textContent =
                         new Date(data.timestamp * 1000).toLocaleTimeString();
                 }
             } catch (e) {
-                document.getElementById("reading").textContent = "Error fetching data";
+                document.getElementById("sps_reading").textContent = "Error fetching data";
             }
         }
+
+        async function getWeatherFromCache() {
+            try {
+                const res = await fetch("{% url 'sensors:latest_weather' %}");
+                const data = await res.json();
+                if (data.error) {
+                    document.getElementById("weather_reading").textContent = data.error;
+                } else if (data.value !== null) {
+                    document.getElementById("weather_reading").textContent = data.value;
+                }
+            } catch (e) {
+                document.getElementById("weather_reading").textContent = "Error fetching data";
+            }
+        }
+
+        async function fetchReading() {
+            await getSpsFromCache();
+            await getWeatherFromCache();
+            await drawPm();
+            await drawNc();
+            await drawNcVsPm();
+            await drawWeather();
+        }
         fetchReading();
-        setInterval(fetchReading, 60000);
+        setInterval(fetchReading, 12000);
     </script>
 </body>
 

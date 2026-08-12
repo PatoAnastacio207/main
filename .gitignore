@@ -43,3 +43,6 @@ pip-delete-this-directory.txt
 .venv
 env/
 venv/
+
+# Local SQLite test database
+test_db.sqlite3

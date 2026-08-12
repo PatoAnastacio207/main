@@ -10,10 +10,30 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+def _load_env_file() -> None:
+    env_path = BASE_DIR / ".env"
+    if not env_path.exists():
+        return
+
+    for line in env_path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        os.environ.setdefault(key, value)
+
+
+_load_env_file()
 
 
 # Quick-start development settings - unsuitable for production
@@ -82,10 +102,17 @@ CACHES = {
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+DB_NAME = os.getenv("DB_NAME", "")
+
+if DB_NAME != "production" and DB_NAME != "development":
+    raise RuntimeError("Set only one of TEST_MODE or DEV_MODE in the environment file.")
+
+db_name = 'test.db.sqlite3' if DB_NAME == "development" else 'db.sqlite3'
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": BASE_DIR / db_name,
     }
 }
 
