@@ -12,13 +12,10 @@ class Sps30Data(models.Model):
     nc25 = models.PositiveSmallIntegerField()
     nc4 = models.PositiveSmallIntegerField()
     nc10 = models.PositiveSmallIntegerField()
-    typicalParticleSize = models.PositiveSmallIntegerField()
+    typical_particle_size = models.PositiveSmallIntegerField()
 
     def __str__(self):
         return f"{self.pm1} {self.pm25} {self.pm4} {self.pm10}"
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ["-timestamp"]

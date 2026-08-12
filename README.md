@@ -1,12 +1,16 @@
 # 2048 Django Project
 
-This repository contains a Django-based project with a blog app and a sensor dashboard that reads from an Arduino serial device.
+This repository contains a Django project with a blog app and a `sensors` app that
+serves an air-quality dashboard (SPS30 particulate sensor + Open-Meteo weather data).
+Readings can come from a locally attached Arduino (read over serial) or be pushed
+remotely over HTTP (e.g. from an ESP32).
 
 ## What you need
 
 - Python 3.12+ recommended
-- Redis server running locally for cache-backed dashboard features
-- Optional: an Arduino device connected to the serial port `/dev/ttyACM0` for the sensor command
+- Redis server running locally (used to cache the latest sensor/weather reading)
+- Optional: an Arduino running the SPS30 firmware (`sensors/arduino/sps30/`)
+  connected over serial, for the `read_serial` command
 
 ## Quick start
 
@@ -25,29 +29,70 @@ This repository contains a Django-based project with a blog app and a sensor das
    pip install -r requirements.txt
    ```
 
-4. Apply database migrations:
+4. Create a `.env` file in the project root (see [Environment variables](#environment-variables) below):
+
+   ```bash
+   echo "DB_NAME=development" > .env
+   ```
+
+5. Apply database migrations:
 
    ```bash
    python manage.py migrate
    ```
 
-5. Start the development server:
+6. Start the development server:
 
    ```bash
    python manage.py runserver
    ```
 
-6. Open the site at `http://127.0.0.1:8000/`.
+7. Open the dashboard at `http://127.0.0.1:8000/sensors/`.
+
+## Environment variables
+
+Set these in a `.env` file at the project root (loaded automatically by `2048/settings.py`).
+
+| Variable          | Required | Purpose                                                                 |
+|--------------------|----------|--------------------------------------------------------------------------|
+| `DB_NAME`          | Yes      | `development` (uses `test.db.sqlite3`) or `production` (uses `db.sqlite3`). The app raises an error at startup if this isn't set to one of the two. |
+| `SENSOR_API_KEY`   | Only for HTTP ingest | Shared secret that remote devices must send to `POST /sensors/ingest/sps30`. Leave unset to keep that endpoint disabled (it always rejects requests without a matching key). |
 
 ## Sensor dashboard notes
 
-The `sensors` app depends on Redis and a serial stream. If you do not have the Arduino hardware attached, the dashboard still loads, but the live sensor command will not receive readings until the device is available.
+The `sensors` app depends on Redis for the "latest reading" cache. If Redis or the
+sensor device isn't available, the dashboard still loads — the historical graphs
+(backed by the database) work regardless, but the live-reading cards and date range
+filter will show "No hay datos disponibles" until a reading comes in.
 
-To use the serial reader manually:
+There are two ways to feed the dashboard:
+
+**1. Local serial reader** (Arduino attached over USB):
 
 ```bash
 python manage.py read_serial
 ```
+
+Reads from `/dev/ttyUSB0` at 115200 baud (see `SERIAL_PORT`/`BAUD_RATE` in
+`sensors/management/commands/read_serial.py` if your device uses a different port).
+
+**2. HTTP ingest endpoint** (for remote devices, e.g. an ESP32 over WiFi):
+
+```
+POST /sensors/ingest/sps30
+X-Api-Key: <SENSOR_API_KEY>
+Content-Type: application/json
+
+{
+  "pm1": 0, "pm25": 0, "pm4": 0, "pm10": 0,
+  "nc0": 0, "nc1": 0, "nc25": 0, "nc4": 0, "nc10": 0,
+  "typical_particle_size": 0
+}
+```
+
+All fields are required integers. The endpoint also fetches current weather for the
+station's configured coordinates (`sensors/weather.py`) and stores it alongside the
+reading. Returns `201` with the created record id on success.
 
 ## Useful project commands
 
@@ -55,10 +100,11 @@ python manage.py read_serial
 python manage.py check
 python manage.py migrate
 python manage.py runserver
+python manage.py read_serial
 ```
 
 ## GitHub upload advice
 
-- Do not upload the virtual environment folder (`.venv`, `bin`, `lib`, `include`, `lib64`) to GitHub.
+- Do not upload the virtual environment folder (`.venv`) to GitHub.
 - Use `requirements.txt` so other people can recreate the environment with the same package versions.
-- Keep any real secrets, local ports, and hardware-specific paths out of the repository.
+- Keep `.env`, real secrets, local ports, and hardware-specific paths out of the repository.
