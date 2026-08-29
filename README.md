@@ -103,6 +103,95 @@ python manage.py runserver
 python manage.py read_serial
 ```
 
+## Running with Docker on your own server
+
+The repo ships a `Dockerfile` (gunicorn + WhiteNoise) and a `docker-compose.yml`
+that also starts the Redis the sensors app needs.
+
+### 1. Get the code onto the server
+
+```bash
+git clone <your-repo-url> 2048
+cd 2048
+```
+
+### 2. Create the environment file
+
+```bash
+cp .env.docker.example .env.docker
+python3 -c "import secrets; print(secrets.token_urlsafe(50))"   # paste as SECRET_KEY
+```
+
+Edit `.env.docker` and set at least `SECRET_KEY`, `ALLOWED_HOSTS` (your domain or
+server IP) and, if you use the HTTP ingest endpoint, `SENSOR_API_KEY`.
+`.env.docker` is gitignored — keep it that way.
+
+### 3. Build and start
+
+```bash
+docker compose up -d --build
+```
+
+The entrypoint runs `migrate` and `collectstatic` on every start, so a fresh
+server comes up with an empty database ready to use. The app listens on port
+8000.
+
+### 4. Create your admin user
+
+```bash
+docker compose exec web python manage.py createsuperuser
+```
+
+### Bringing your existing data along (optional)
+
+The database and uploaded images live in the `app-data` volume at `/data`, not in
+the image. To move your current local data over:
+
+```bash
+docker compose cp db.sqlite3 web:/data/db.sqlite3
+docker compose cp articles web:/data/media/articles    # existing article images
+docker compose restart web
+```
+
+### Day-to-day commands
+
+```bash
+docker compose logs -f web       # follow logs
+docker compose up -d --build     # deploy after a git pull
+docker compose down              # stop (the app-data volume is kept)
+```
+
+### Configuration reference (Docker)
+
+| Variable               | Default                     | Purpose |
+|------------------------|-----------------------------|---------|
+| `DB_NAME`              | —                           | `production` or `development`, as before. |
+| `SECRET_KEY`           | insecure dev key            | Must be set to a random value in production. |
+| `DEBUG`                | `True`                      | Set to `False` on the server. |
+| `ALLOWED_HOSTS`        | `*`                         | Comma-separated hostnames/IPs. |
+| `CSRF_TRUSTED_ORIGINS` | empty                       | Comma-separated `https://…` origins, needed for admin logins over HTTPS. |
+| `BEHIND_HTTPS_PROXY`   | `False`                     | Set to `True` when a proxy terminates TLS. |
+| `REDIS_URL`            | `redis://127.0.0.1:6379/1`  | Compose sets this to `redis://redis:6379/1`. |
+| `DATA_DIR`             | project root                | Where the SQLite file lives; `/data` in Docker. |
+| `MEDIA_ROOT`           | `$DATA_DIR/media`           | Uploaded article images. |
+| `STATIC_ROOT`          | `./staticfiles`             | Target of `collectstatic`. |
+
+All of these keep their old behaviour when unset, so local development still
+works with just `DB_NAME` in `.env`.
+
+### Putting it behind HTTPS
+
+Gunicorn serves plain HTTP. For a public server, run nginx or Caddy in front,
+change the port mapping in `docker-compose.yml` to `"127.0.0.1:8000:8000"`, and
+set `CSRF_TRUSTED_ORIGINS=https://your-domain` and `BEHIND_HTTPS_PROXY=True`.
+
+### The serial reader in Docker
+
+`read_serial` needs a physically attached Arduino, so it is commented out in
+`docker-compose.yml`. Uncomment the `serial-reader` service (and adjust the
+device path) only if the sensor is plugged into the server itself. Remote
+devices posting to `/sensors/ingest/sps30` need nothing extra.
+
 ## GitHub upload advice
 
 - Do not upload the virtual environment folder (`.venv`) to GitHub.

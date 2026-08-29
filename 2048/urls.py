@@ -15,8 +15,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from django.conf import settings
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
+from django.views.static import serve
+
 from .views import home
 
 urlpatterns = [
@@ -24,4 +27,14 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("sensors/", include("sensors.urls")),
     path("", home, name="home"),
+]
+
+# Uploaded article images. Django serves these itself, which is fine at this
+# project's traffic level; put them behind nginx/caddy if that ever changes.
+urlpatterns += [
+    re_path(
+        r"^media/(?P<path>.*)$",
+        serve,
+        {"document_root": settings.MEDIA_ROOT},
+    ),
 ]
