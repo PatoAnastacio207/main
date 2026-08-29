@@ -39,13 +39,31 @@ _load_env_file()
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
+def _env_bool(name: str, default: bool) -> bool:
+    return os.getenv(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _env_list(name: str, default: str) -> list[str]:
+    return [item.strip() for item in os.getenv(name, default).split(",") if item.strip()]
+
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-f(jltn^lqae+fu5r#$2!#zvv#1qo9j%der+l*+ejtn=kfm3lqz"
+SECRET_KEY = os.getenv(
+    "SECRET_KEY",
+    "django-insecure-f(jltn^lqae+fu5r#$2!#zvv#1qo9j%der+l*+ejtn=kfm3lqz",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = _env_bool("DEBUG", True)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = _env_list("ALLOWED_HOSTS", "*")
+
+# Required for admin/form POSTs when running behind an HTTPS reverse proxy.
+CSRF_TRUSTED_ORIGINS = _env_list("CSRF_TRUSTED_ORIGINS", "")
+
+# Trust the proxy's X-Forwarded-Proto so Django knows the request was HTTPS.
+if _env_bool("BEHIND_HTTPS_PROXY", False):
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Shared secret that remote sensor devices (e.g. an ESP32) must send in the
 # X-Api-Key header when POSTing readings to the sensors HTTP ingest endpoint.
@@ -67,6 +85,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # Serves collected static files when DEBUG is off (no nginx config needed).
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -97,7 +117,7 @@ WSGI_APPLICATION = "2048.wsgi.application"
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
+        "LOCATION": os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1"),
         "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
     }
 }
@@ -113,10 +133,20 @@ if DB_NAME != "production" and DB_NAME != "development":
 
 db_name = 'test.db.sqlite3' if DB_NAME == "development" else 'db.sqlite3'
 
+# Where mutable state lives. In Docker this points at a mounted volume so the
+# database survives image rebuilds; locally it defaults to the project root.
+DATA_DIR = Path(os.getenv("DATA_DIR", BASE_DIR))
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / db_name,
+        "NAME": DATA_DIR / db_name,
+        "OPTIONS": {
+            # WAL + a busy timeout keep concurrent gunicorn workers from
+            # tripping over "database is locked" on SQLite.
+            "init_command": "PRAGMA journal_mode=WAL;",
+            "timeout": 20,
+        },
     }
 }
 
@@ -156,3 +186,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = Path(os.getenv("STATIC_ROOT", BASE_DIR / "staticfiles"))
+
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+}
+
+# Uploaded files (article images). Kept in its own directory so the media URL
+# never exposes anything else in the project root.
+MEDIA_URL = "media/"
+MEDIA_ROOT = Path(os.getenv("MEDIA_ROOT", DATA_DIR / "media"))

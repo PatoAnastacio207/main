@@ -6,6 +6,10 @@ pyserial==3.5
 redis==8.0.1
 Pillow==12.2.0
 
+# Production server (Docker)
+gunicorn==23.0.0
+whitenoise==6.9.0
+
 # Compatibility helpers already present in the project environment
 asgiref==3.11.1
 future==1.0.0

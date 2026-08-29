@@ -1,0 +1,54 @@
+services:
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    # Cache only — no persistence needed, readings are also written to the DB.
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: .env.docker
+    environment:
+      REDIS_URL: redis://redis:6379/1
+      DATA_DIR: /data
+      MEDIA_ROOT: /data/media
+      STATIC_ROOT: /app/staticfiles
+    volumes:
+      # SQLite database + uploaded images
+      - app-data:/data
+    ports:
+      # Behind a reverse proxy (nginx/caddy), change this to "127.0.0.1:8000:8000"
+      # so the app is not reachable directly from the internet.
+      - "8000:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  # Optional: only if the Arduino is plugged into the remote server over USB.
+  # Remote devices posting to /sensors/ingest/sps30 do not need this.
+  # serial-reader:
+  #   build: .
+  #   restart: unless-stopped
+  #   env_file: .env.docker
+  #   environment:
+  #     REDIS_URL: redis://redis:6379/1
+  #     DATA_DIR: /data
+  #   volumes:
+  #     - app-data:/data
+  #   devices:
+  #     - "/dev/ttyUSB0:/dev/ttyUSB0"
+  #   group_add:
+  #     - dialout
+  #   command: ["python", "manage.py", "read_serial"]
+  #   depends_on:
+  #     redis:
+  #       condition: service_healthy
+
+volumes:
+  app-data:

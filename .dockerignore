@@ -1,0 +1,28 @@
+# Local virtualenv committed into the repo root
+bin/
+lib/
+lib64
+include/
+pyvenv.cfg
+
+# VCS / tooling
+.git/
+.gitignore
+.claude/
+README.md
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Local state that belongs on a volume, not in the image
+.env
+db.sqlite3
+test.db.sqlite3
+staticfiles/
+media/
+*.log
+
+# Firmware sources, not needed by the server
+sensors/arduino/
+micro-controller/

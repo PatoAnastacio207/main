@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 manage.py check)",
+      "Bash(git checkout *)",
+      "Bash(git add *)"
+    ]
+  }
+}

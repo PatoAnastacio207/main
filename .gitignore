@@ -46,3 +46,8 @@ venv/
 
 # Local SQLite test database
 test.db.sqlite3
+
+# Docker / deployment
+.env.docker
+staticfiles/
+media/
