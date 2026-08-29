@@ -18,6 +18,7 @@ Including another URLconf
 from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path, re_path
+from django.views.generic import TemplateView
 from django.views.static import serve
 
 from .views import home
@@ -27,6 +28,22 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("sensors/", include("sensors.urls")),
     path("", home, name="home"),
+    # The service worker must be served from the site root: its scope is the
+    # directory it is served from, so a copy under /static/ could only ever
+    # control /static/*.
+    path(
+        "sw.js",
+        TemplateView.as_view(
+            template_name="sw.js",
+            content_type="application/javascript",
+        ),
+        name="service_worker",
+    ),
+    path(
+        "offline/",
+        TemplateView.as_view(template_name="offline.html"),
+        name="offline",
+    ),
 ]
 
 # Uploaded article images. Django serves these itself, which is fine at this

@@ -1,0 +1,29 @@
+{% load static %}
+{% comment %}
+Shared PWA head fragment. Included by every top-level template so the whole
+site is installable, not just one page.
+{% endcomment %}
+<link rel="manifest" href="{% static 'manifest.webmanifest' %}">
+<meta name="theme-color" content="#111111">
+
+{# Standalone display. The apple-* variants are still needed for older iOS. #}
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="2048">
+
+{# iOS ignores the manifest icons and uses this one for the home screen. #}
+<link rel="apple-touch-icon" href="{% static 'icons/apple-touch-icon.png' %}">
+<link rel="icon" href="{% static 'icons/icon-192.png' %}">
+
+<script>
+    // navigator.serviceWorker is undefined on insecure origins, so this is a
+    // no-op over plain http:// and the site just works as a normal website.
+    if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+            navigator.serviceWorker.register("/sw.js").catch(function (err) {
+                console.warn("Service worker registration failed:", err);
+            });
+        });
+    }
+</script>
