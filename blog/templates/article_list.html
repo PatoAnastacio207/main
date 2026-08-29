@@ -1,36 +1,55 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Articles</title>
-</head>
-<body>
+{% extends "blog_base.html" %}
 
-<a href="/">&larr; Back to home</a>
+{% block title %}Articles{% endblock %}
 
-<h1>Articles</h1>
+{% block content %}
+    <div class="page-head">
+        <h1>Articles</h1>
+        <p class="page-sub">
+            {% if articles %}
+                {{ articles|length }} published article{{ articles|length|pluralize }}
+            {% else %}
+                Nothing published yet
+            {% endif %}
+        </p>
+    </div>
 
-{% if request.user.is_staff %}
-    <a href="{% url 'blog_create' %}">+ New Article</a>
-{% endif %}
+    {% if articles %}
+        <div class="card-grid">
+            {% for article in articles %}
+                <article class="card">
+                    <a class="card-link" href="{% url 'blog_detail' article.pk %}">
+                        {% if article.title_img %}
+                            <div class="card-media">
+                                <img src="{{ article.title_img.url }}" alt="" loading="lazy">
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h2 class="card-title">{{ article.title }}</h2>
+                            <p class="card-meta">
+                                <time datetime="{{ article.date|date:'Y-m-d' }}">{{ article.date|date:"F j, Y" }}</time>
+                                {% if article.author %} &middot; {{ article.author }}{% endif %}
+                            </p>
+                            <p class="card-summary">{{ article.summary }}</p>
+                        </div>
+                    </a>
 
-{% if articles %}
-    {% for article in articles %}
-        <div>
-            <h2><a href="{% url 'blog_detail' article.pk %}">{{ article.title }}</a></h2>
-            <p>{{ article.date }} &mdash; {{ article.author }}</p>
-            <p>{{ article.summary }}</p>
-            <p>
-                {% for kw in article.keywords_list %}
-                    <span>{{ kw }}</span>{% if not forloop.last %}, {% endif %}
-                {% endfor %}
-            </p>
+                    {% if article.keywords_list %}
+                        <ul class="tags">
+                            {% for kw in article.keywords_list %}
+                                <li>{{ kw }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </article>
+            {% endfor %}
         </div>
-        <hr>
-    {% endfor %}
-{% else %}
-    <p>No articles published yet.</p>
-{% endif %}
-
-</body>
-</html>
+    {% else %}
+        <div class="empty">
+            <p>No articles published yet.</p>
+            {% if user.is_staff %}
+                <p><a href="{% url 'blog_create' %}">Write the first one</a></p>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endblock %}
