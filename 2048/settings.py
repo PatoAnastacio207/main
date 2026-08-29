@@ -10,8 +10,15 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import mimetypes
 import os
 from pathlib import Path
+
+# Neither Python's mimetypes table nor WhiteNoise's built-in one knows about
+# .webmanifest, so the PWA manifest would otherwise be served as
+# application/octet-stream. This covers Django's dev static server; WhiteNoise
+# keeps its own table and is configured separately via WHITENOISE_MIMETYPES.
+mimetypes.add_type("application/manifest+json", ".webmanifest")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -194,6 +201,11 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = Path(os.getenv("STATIC_ROOT", BASE_DIR / "staticfiles"))
+
+# Site-wide assets that belong to no single app (PWA manifest, icons).
+STATICFILES_DIRS = [BASE_DIR / "static"]
+
+WHITENOISE_MIMETYPES = {".webmanifest": "application/manifest+json"}
 
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},

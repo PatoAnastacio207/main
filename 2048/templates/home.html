@@ -1,18 +1,50 @@
+{% load static %}
 <!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <title>{{ article.title }}</title>
-    </head>
-    <body>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="color-scheme" content="light">
+    <title>2048</title>
+    {# Reuses the blog stylesheet: this is the app's launch screen, so it should
+       not be the one unstyled page in the site. #}
+    <link rel="stylesheet" href="{% static 'blog/blog.css' %}">
+    {% include "pwa_head.html" %}
+</head>
+<body>
+
+<header class="site-header">
+    <div class="header-inner">
+        <a class="brand" href="/">2048</a>
+    </div>
+</header>
+
+<main class="container">
+    <div class="page-head">
         <h1>2048</h1>
-        <ul>
-            <li>
-                <a href="/blog">blog</a>
-            </li>
-            <li>
-                <a href="/sensors">calidad de aire</a>
-            </li>
-        </ul>
-    </body>
+        <p class="page-sub">Sensores y blog.</p>
+    </div>
+
+    <div class="card-grid">
+        <article class="card">
+            <a class="card-link" href="{% url 'sensors:dashboard' %}">
+                <div class="card-body">
+                    <h2 class="card-title">Calidad de aire</h2>
+                    <p class="card-summary">Lecturas del SPS30, condiciones atmosféricas y gráficos históricos.</p>
+                </div>
+            </a>
+        </article>
+
+        <article class="card">
+            <a class="card-link" href="{% url 'article_list' %}">
+                <div class="card-body">
+                    <h2 class="card-title">Blog</h2>
+                    <p class="card-summary">Artículos publicados.</p>
+                </div>
+            </a>
+        </article>
+    </div>
+</main>
+
+</body>
 </html>
