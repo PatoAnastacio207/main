@@ -1,15 +1,14 @@
 {% extends "blog_base.html" %}
 
-{% block title %}New article{% endblock %}
+{% block title %}Log in{% endblock %}
 
 {% block content %}
-    <a class="back-link" href="{% url 'article_list' %}">&larr; All articles</a>
-
     <div class="page-head">
-        <h1>New article</h1>
+        <h1>Log in</h1>
+        <p class="page-sub">Staff access for writing and editing articles.</p>
     </div>
 
-    <form class="form-card" method="post" enctype="multipart/form-data" novalidate>
+    <form class="form-card login-card" method="post" novalidate>
         {% csrf_token %}
 
         {% if form.non_field_errors %}
@@ -22,9 +21,6 @@
             <div class="field">
                 <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                 {{ field }}
-                {% if field.help_text %}
-                    <p class="help">{{ field.help_text }}</p>
-                {% endif %}
                 {% for error in field.errors %}
                     <p class="error">{{ error }}</p>
                 {% endfor %}
@@ -32,8 +28,7 @@
         {% endfor %}
 
         <div class="form-actions">
-            <button class="btn btn-primary" type="submit">Save article</button>
-            <a class="btn btn-ghost" href="{% url 'article_list' %}">Cancel</a>
+            <button class="btn btn-primary btn-block" type="submit">Log in</button>
         </div>
     </form>
 {% endblock %}

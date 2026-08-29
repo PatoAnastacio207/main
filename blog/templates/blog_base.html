@@ -1,0 +1,47 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="color-scheme" content="light">
+    <title>{% block title %}Blog{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'blog/blog.css' %}">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="header-inner">
+        <a class="brand" href="/">2048</a>
+
+        <nav class="header-actions">
+            {% if user.is_authenticated %}
+                <span class="user-chip">{{ user.get_username }}</span>
+                {% if user.is_staff %}
+                    <a class="btn btn-primary" href="{% url 'blog_create' %}">+ New article</a>
+                {% endif %}
+                <form class="logout-form" method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button class="btn btn-ghost" type="submit">Log out</button>
+                </form>
+            {% else %}
+                <a class="btn btn-primary" href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">Log in</a>
+            {% endif %}
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</main>
+
+</body>
+</html>

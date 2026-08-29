@@ -1,0 +1,471 @@
+/* Blog styling: plain black on white, deliberately not matching the dark
+   sensors dashboard. Mobile-first — single column by default, widening only at
+   the breakpoint near the bottom. */
+
+:root {
+    --bg: #ffffff;
+    --text: #111111;
+    --text-dim: #666666;
+    --border: #dddddd;
+    --border-strong: #111111;
+    --surface: #fafafa;
+    --bad: #b00020;
+    --radius: 6px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    /* Stops iOS from inflating text in landscape */
+    -webkit-text-size-adjust: 100%;
+    /* Keeps form controls light even when the phone is in dark mode */
+    color-scheme: light;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.6;
+    background: var(--bg);
+    color: var(--text);
+    /* Keeps content clear of notches and home indicators */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+a {
+    color: var(--text);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+a:hover {
+    color: var(--text-dim);
+}
+
+:focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 2px;
+}
+
+/* ---------- Header ---------- */
+
+.site-header {
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    padding-top: env(safe-area-inset-top);
+}
+
+.header-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.brand {
+    font-weight: 700;
+    font-size: 1.05rem;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.user-chip {
+    /* Hidden on phones to keep the header on one line */
+    display: none;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    max-width: 12ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    /* 44px keeps taps comfortable on phones */
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-strong);
+    background: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.btn:hover {
+    background: var(--text);
+    color: var(--bg);
+}
+
+.btn-primary {
+    background: var(--text);
+    color: var(--bg);
+}
+
+.btn-primary:hover {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.btn-ghost {
+    border-color: var(--border);
+    color: var(--text-dim);
+    font-weight: 500;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.logout-form {
+    margin: 0;
+}
+
+/* ---------- Layout ---------- */
+
+.container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 24px 16px calc(48px + env(safe-area-inset-bottom));
+}
+
+.page-head {
+    margin-bottom: 24px;
+}
+
+h1 {
+    margin: 0 0 6px;
+    font-size: 1.6rem;
+    line-height: 1.25;
+    /* Long unbroken titles must not scroll the page sideways */
+    overflow-wrap: break-word;
+}
+
+.page-sub {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 16px;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+}
+
+/* ---------- Messages ---------- */
+
+.messages {
+    list-style: none;
+    margin: 0 0 20px;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.messages li {
+    padding: 12px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-size: 0.9rem;
+}
+
+.messages li.error {
+    border-color: var(--bad);
+    color: var(--bad);
+}
+
+/* ---------- Article cards ---------- */
+
+.card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+.card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.card:hover {
+    border-color: var(--border-strong);
+}
+
+.card-link {
+    color: inherit;
+    text-decoration: none;
+    display: block;
+}
+
+.card-media {
+    aspect-ratio: 16 / 9;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.card-body {
+    padding: 16px;
+}
+
+.card-title {
+    margin: 0 0 6px;
+    font-size: 1.15rem;
+    line-height: 1.3;
+    overflow-wrap: break-word;
+}
+
+.card-meta {
+    margin: 0 0 10px;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+}
+
+.card-summary {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: 0.92rem;
+    /* Keeps every card a predictable height in the grid */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ---------- Tags ---------- */
+
+.tags {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0 16px 16px;
+}
+
+.tags li {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+/* ---------- Empty state ---------- */
+
+.empty {
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-dim);
+}
+
+.empty p {
+    margin: 0 0 4px;
+}
+
+/* ---------- Article detail ---------- */
+
+.article-header {
+    margin-bottom: 20px;
+}
+
+.article-meta {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: 0.88rem;
+}
+
+.hero {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.hero img {
+    width: 100%;
+    display: block;
+}
+
+.lead {
+    color: var(--text-dim);
+    font-size: 1.02rem;
+    margin: 0 0 24px;
+    padding-left: 14px;
+    border-left: 3px solid var(--text);
+}
+
+.prose {
+    /* ~68 characters is the comfortable reading measure */
+    max-width: 68ch;
+    font-size: 1.02rem;
+    line-height: 1.75;
+    overflow-wrap: break-word;
+}
+
+.prose p {
+    margin: 0 0 1em;
+}
+
+.article-footer {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+
+.article-footer .label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+    margin: 0 0 10px;
+}
+
+.article-footer .tags {
+    padding: 0;
+}
+
+/* ---------- Forms ---------- */
+
+.form-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 16px;
+}
+
+.field {
+    margin-bottom: 20px;
+}
+
+.field > label {
+    display: block;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+}
+
+.field input[type="text"],
+.field input[type="date"],
+.field input[type="file"],
+.field input[type="password"],
+.field textarea,
+.field select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 11px 12px;
+    color: var(--text);
+    font-family: inherit;
+    /* Must stay at 16px or iOS Safari zooms in on focus */
+    font-size: 16px;
+}
+
+.field textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.6;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+    border-color: var(--border-strong);
+    outline: none;
+}
+
+.field .help {
+    margin: 6px 0 0;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+.field .error,
+.form-errors {
+    margin: 6px 0 0;
+    font-size: 0.85rem;
+    color: var(--bad);
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+}
+
+.login-card {
+    max-width: 380px;
+    margin: 0 auto;
+}
+
+/* ---------- Wider screens ---------- */
+
+@media (min-width: 640px) {
+    .card-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+
+    .user-chip {
+        display: inline;
+    }
+
+    .container {
+        padding: 32px 24px 64px;
+    }
+
+    .form-card {
+        padding: 28px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+}

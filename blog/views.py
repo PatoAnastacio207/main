@@ -18,7 +18,7 @@ def article_detail(request, pk):
     return render(request, "article_detail.html", {"article": article})
 
 
-@staff_member_required
+@staff_member_required(login_url="login")
 def article_create(request):
     """Admin-only view: form to create a new article."""
     if request.method == "POST":

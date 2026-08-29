@@ -170,6 +170,13 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+# Authentication redirects (the blog app provides the login/logout views)
+
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "article_list"
+LOGOUT_REDIRECT_URL = "article_list"
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
