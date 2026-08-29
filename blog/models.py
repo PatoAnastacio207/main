@@ -1,6 +1,7 @@
 import bleach
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 
 ALLOWED_TAGS = [
     "b",
@@ -43,9 +44,13 @@ class Article(models.Model):
     content = models.TextField(
         help_text="Only styling tags are allowed (b, i, u, em, strong, span, etc.)"
     )
-    summary = models.TextField()
-    keywords = models.CharField(max_length=500, help_text="Comma-separated keywords")
-    date = models.DateField()
+    summary = models.TextField(blank=True, default="")
+    keywords = models.CharField(
+        max_length=500, blank=True, default="", help_text="Comma-separated keywords"
+    )
+    # localdate, not now: this is a DateField and the project runs in a
+    # non-UTC timezone, so "today" has to be today locally.
+    date = models.DateField(default=timezone.localdate)
     author = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name="articles"
     )
