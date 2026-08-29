@@ -30,7 +30,9 @@
                                 <time datetime="{{ article.date|date:'Y-m-d' }}">{{ article.date|date:"F j, Y" }}</time>
                                 {% if article.author %} &middot; {{ article.author }}{% endif %}
                             </p>
-                            <p class="card-summary">{{ article.summary }}</p>
+                            {% if article.summary %}
+                                <p class="card-summary">{{ article.summary }}</p>
+                            {% endif %}
                         </div>
                     </a>
 
