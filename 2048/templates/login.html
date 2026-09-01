@@ -1,0 +1,60 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="color-scheme" content="light">
+    <title>Log in — 2048</title>
+    <link rel="stylesheet" href="{% static 'blog/blog.css' %}">
+    {% include "pwa_head.html" %}
+</head>
+<body>
+
+{% comment %}
+Standalone rather than extending blog_base.html: this page gates the whole
+site, not just the blog, and the base template's header links to pages an
+anonymous visitor cannot reach anyway.
+{% endcomment %}
+<header class="site-header">
+    <div class="header-inner">
+        <span class="brand">2048</span>
+    </div>
+</header>
+
+<main class="container">
+    <div class="page-head">
+        <h1>Log in</h1>
+        <p class="page-sub">This site is private. Sign in to continue.</p>
+    </div>
+
+    <form class="form-card login-card" method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+                <p class="form-errors">{{ error }}</p>
+            {% endfor %}
+        {% endif %}
+
+        {% for field in form %}
+            <div class="field">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% for error in field.errors %}
+                    <p class="error">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        {# Carries the page the login wall interrupted, so the user lands back on it. #}
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+        <div class="form-actions">
+            <button class="btn btn-primary btn-block" type="submit">Log in</button>
+        </div>
+    </form>
+</main>
+
+</body>
+</html>

@@ -99,6 +99,11 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    # The whole site is private: every view requires a logged-in user
+    # unless it opts out with @login_not_required (the login page itself,
+    # the PWA shell, and the sensor ingest endpoint, which authenticates
+    # devices with an API key instead).
+    "django.contrib.auth.middleware.LoginRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -178,11 +183,13 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Authentication redirects (the blog app provides the login/logout views)
+# Authentication redirects. The login/logout views live at the project
+# root rather than under /blog/, because the login form now gates the
+# whole site rather than just article editing.
 
 LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "article_list"
-LOGOUT_REDIRECT_URL = "article_list"
+LOGIN_REDIRECT_URL = "home"
+LOGOUT_REDIRECT_URL = "login"
 
 
 # Internationalization

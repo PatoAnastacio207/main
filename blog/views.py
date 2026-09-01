@@ -1,24 +1,25 @@
 from django.contrib import messages
-from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import get_object_or_404, redirect, render
+
+from authz import staff_required
 
 from .forms import ArticleForm
 from .models import Article
 
 
 def article_list(request):
-    """Public view: shows all published articles."""
+    """Shows all published articles to any logged-in user."""
     articles = Article.objects.filter(status=Article.Status.PUBLISHED)
     return render(request, "article_list.html", {"articles": articles})
 
 
 def article_detail(request, pk):
-    """Public dynamic view: renders a single published article."""
+    """Renders a single published article for any logged-in user."""
     article = get_object_or_404(Article, pk=pk, status=Article.Status.PUBLISHED)
     return render(request, "article_detail.html", {"article": article})
 
 
-@staff_member_required(login_url="login")
+@staff_required
 def article_create(request):
     """Admin-only view: form to create a new article."""
     if request.method == "POST":

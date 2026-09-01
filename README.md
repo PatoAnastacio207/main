@@ -5,6 +5,9 @@ serves an air-quality dashboard (SPS30 particulate sensor + Open-Meteo weather d
 Readings can come from a locally attached Arduino (read over serial) or be pushed
 remotely over HTTP (e.g. from an ESP32).
 
+The whole site is private: every page requires a logged-in user. See
+[Access control](#access-control) for the exceptions and for what staff-only means.
+
 ## What you need
 
 - Python 3.12+ recommended
@@ -47,7 +50,40 @@ remotely over HTTP (e.g. from an ESP32).
    python manage.py runserver
    ```
 
-7. Open the dashboard at `http://127.0.0.1:8000/sensors/`.
+7. Create a user to log in with (the site has no public pages, so you need one
+   before anything is reachable). Answer `yes` when asked about superuser status
+   if you want access to the priorities app and article editing:
+
+   ```bash
+   python manage.py createsuperuser
+   ```
+
+8. Open `http://127.0.0.1:8000/` and log in. The dashboard is at
+   `http://127.0.0.1:8000/sensors/`.
+
+## Access control
+
+`LoginRequiredMiddleware` puts the entire site behind the login form at `/login/`.
+Anonymous requests to any page are redirected there and returned to where they were
+headed after signing in.
+
+Two levels of access:
+
+| Level | Can reach |
+|-------|-----------|
+| Any logged-in user | Home, the blog (reading articles), the sensor dashboard and its data endpoints |
+| Staff only (`is_staff`) | The priorities app at `/priorities/` — both viewing and editing — plus creating articles at `/blog/new/`, and the Django admin |
+
+A logged-in non-staff user who tries a staff-only URL gets a 403, not another login
+prompt. Grant staff access from the admin, or with `createsuperuser`.
+
+Three routes are deliberately left open, none of which expose user data:
+
+- `/login/` — otherwise there would be no way in.
+- `/sw.js`, `/offline/` and `/manifest/<section>.webmanifest` — the PWA shell. A
+  service worker that cached a login redirect would break the installed apps.
+- `POST /sensors/ingest/sps30` — remote devices have no session to log in with, so
+  they authenticate with the `SENSOR_API_KEY` header instead.
 
 ## Environment variables
 

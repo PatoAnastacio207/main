@@ -25,7 +25,7 @@ const PRECACHE_URLS = [
 
 // Pages that must never be served from cache: they are authentication or
 // admin surfaces where a stale copy would be actively misleading.
-const NEVER_CACHE = [/^\/admin\//, /^\/blog\/login\//, /^\/blog\/logout\//, /^\/blog\/new\//];
+const NEVER_CACHE = [/^\/admin\//, /^\/login\//, /^\/logout\//, /^\/blog\/new\//];
 
 function isNeverCached(pathname) {
     return NEVER_CACHE.some((re) => re.test(pathname));

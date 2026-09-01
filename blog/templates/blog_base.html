@@ -15,19 +15,16 @@
     <div class="header-inner">
         <a class="brand" href="/">2048</a>
 
+        {# No anonymous branch: every page here is behind the login wall. #}
         <nav class="header-actions">
-            {% if user.is_authenticated %}
-                <span class="user-chip">{{ user.get_username }}</span>
-                {% if user.is_staff %}
-                    <a class="btn btn-primary" href="{% url 'blog_create' %}">+ New article</a>
-                {% endif %}
-                <form class="logout-form" method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button class="btn btn-ghost" type="submit">Log out</button>
-                </form>
-            {% else %}
-                <a class="btn btn-primary" href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}">Log in</a>
+            <span class="user-chip">{{ user.get_username }}</span>
+            {% if user.is_staff %}
+                <a class="btn btn-primary" href="{% url 'blog_create' %}">+ New article</a>
             {% endif %}
+            <form class="logout-form" method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button class="btn btn-ghost" type="submit">Log out</button>
+            </form>
         </nav>
     </div>
 </header>

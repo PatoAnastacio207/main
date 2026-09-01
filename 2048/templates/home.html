@@ -16,6 +16,14 @@
 <header class="site-header">
     <div class="header-inner">
         <a class="brand" href="/">2048</a>
+
+        <nav class="header-actions">
+            <span class="user-chip">{{ user.get_username }}</span>
+            <form class="logout-form" method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button class="btn btn-ghost" type="submit">Log out</button>
+            </form>
+        </nav>
     </div>
 </header>
 
