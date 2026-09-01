@@ -23,9 +23,18 @@ services:
       # SQLite database + uploaded images
       - app-data:/data
     ports:
-      # Behind a reverse proxy (nginx/caddy), change this to "127.0.0.1:8000:8000"
-      # so the app is not reachable directly from the internet.
-      - "8000:8000"
+      # Bound to one address on purpose. Docker publishes ports by writing its
+      # own iptables rules, which are evaluated before ufw's, so a published
+      # port on 0.0.0.0 stays reachable from the LAN no matter what ufw says.
+      # Binding here is what actually restricts it.
+      #
+      # Set BIND_ADDR in a .env file beside this one (Compose reads it for
+      # substitution; it is separate from .env.docker, which sets the app's
+      # environment). For Tailscale-only access:
+      #     BIND_ADDR=100.x.y.z      # from: tailscale ip -4
+      # Defaults to loopback, so a missing value fails closed rather than
+      # exposing the app.
+      - "${BIND_ADDR:-127.0.0.1}:8000:8000"
     depends_on:
       redis:
         condition: service_healthy
