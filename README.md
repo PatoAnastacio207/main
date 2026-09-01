@@ -179,6 +179,34 @@ docker compose down              # stop (the app-data volume is kept)
 All of these keep their old behaviour when unset, so local development still
 works with just `DB_NAME` in `.env`.
 
+### Restricting access (Tailscale, LAN)
+
+The published port is bound to a single address via `BIND_ADDR`, set in a
+`.env` file next to `docker-compose.yml`. This is separate from `.env.docker`:
+Compose reads `.env` for variable substitution in the compose file itself,
+while `.env.docker` sets the application's environment.
+
+```bash
+echo "BIND_ADDR=$(tailscale ip -4)" > .env
+docker compose up -d
+```
+
+Binding is what actually restricts access. `ufw` rules do **not** cover Docker
+published ports: Docker writes its own iptables rules in the `DOCKER` chain,
+which are evaluated before ufw's `INPUT` chain, so a port published on
+`0.0.0.0` stays reachable from the LAN even when `ufw status` suggests
+otherwise.
+
+Add the address to `ALLOWED_HOSTS` in `.env.docker` as well, since that
+filters the `Host` header:
+
+```
+ALLOWED_HOSTS=100.x.y.z,debian13.your-tailnet.ts.net
+```
+
+Leaving `BIND_ADDR` unset falls back to `127.0.0.1`, which fails closed: the
+app is then reachable only from the server itself.
+
 ### Putting it behind HTTPS
 
 Gunicorn serves plain HTTP. For a public server, run nginx or Caddy in front,
