@@ -1,20 +1,30 @@
-{% load static %}
 {% comment %}
 Shared PWA head fragment. Included by every top-level template so the whole
 site is installable, not just one page.
+
+Everything here is per-section: the values come from the "pwa" context
+processor in 2048/pwa.py, which picks the section out of the request path. That
+is what lets /blog/, /sensors/ and /priorities/ install as separate home screen
+apps with their own name and icon.
+
+Careful with edits: these tags only work inside <head>. Any stray text in the
+head — including a {# #} comment spanning more than one line, which Django does
+not strip — ends the head element and pushes the tags below it into the body,
+where Safari ignores them and Add to Home Screen falls back to a plain
+bookmark.
 {% endcomment %}
-<link rel="manifest" href="{% static 'manifest.webmanifest' %}">
-<meta name="theme-color" content="#111111">
+<link rel="manifest" href="{{ pwa.manifest_url }}">
+<meta name="theme-color" content="{{ pwa.theme_color }}">
 
 {# Standalone display. The apple-* variants are still needed for older iOS. #}
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="2048">
+<meta name="apple-mobile-web-app-status-bar-style" content="{{ pwa.status_bar_style }}">
+<meta name="apple-mobile-web-app-title" content="{{ pwa.title }}">
 
 {# iOS ignores the manifest icons and uses this one for the home screen. #}
-<link rel="apple-touch-icon" href="{% static 'icons/apple-touch-icon.png' %}">
-<link rel="icon" href="{% static 'icons/icon-192.png' %}">
+<link rel="apple-touch-icon" href="{{ pwa.apple_icon }}">
+<link rel="icon" href="{{ pwa.icon }}">
 
 <script>
     // navigator.serviceWorker is undefined on insecure origins, so this is a

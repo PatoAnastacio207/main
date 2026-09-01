@@ -21,6 +21,7 @@ from django.urls import include, path, re_path
 from django.views.generic import TemplateView
 from django.views.static import serve
 
+from .pwa import manifest
 from .views import home
 
 urlpatterns = [
@@ -39,6 +40,12 @@ urlpatterns = [
             content_type="application/javascript",
         ),
         name="service_worker",
+    ),
+    # One manifest per section, so each installs as its own home screen app.
+    path(
+        "manifest/<slug:slug>.webmanifest",
+        manifest,
+        name="pwa_manifest",
     ),
     path(
         "offline/",
