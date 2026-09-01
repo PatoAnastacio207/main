@@ -4,6 +4,7 @@ import time
 from datetime import datetime, timedelta
 
 from django.conf import settings
+from django.contrib.auth.decorators import login_not_required
 from django.core.cache import cache
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -145,6 +146,7 @@ def get_weather_graph(request):
     return JsonResponse(data)
 
 
+@login_not_required
 @csrf_exempt
 @require_POST
 def ingest_sps30_reading(request):
@@ -153,6 +155,9 @@ def ingest_sps30_reading(request):
 
     Expects a JSON body with the fields in SPS30_READING_FIELDS, and an
     X-Api-Key header matching settings.SENSOR_API_KEY.
+
+    Exempt from the site-wide login wall: devices have no session to log in
+    with, so the API key below is what authenticates them.
     """
     expected_key = settings.SENSOR_API_KEY
     provided_key = request.headers.get("X-Api-Key", "")

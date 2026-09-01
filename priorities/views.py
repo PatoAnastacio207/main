@@ -1,6 +1,7 @@
-from django.contrib.admin.views.decorators import staff_member_required
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
+
+from authz import staff_required
 
 from .forms import TaskForm
 from .models import Task
@@ -11,7 +12,7 @@ def _pending():
     return Task.objects.filter(completed_at__isnull=True)
 
 
-@staff_member_required(login_url="login")
+@staff_required
 def task_list(request):
     """Lists pending tasks and creates new ones."""
     if request.method == "POST":
@@ -29,7 +30,7 @@ def task_list(request):
     )
 
 
-@staff_member_required(login_url="login")
+@staff_required
 def task_action(request, pk):
     """Applies one action to a task: move it up or down, or complete it."""
     if request.method != "POST":
