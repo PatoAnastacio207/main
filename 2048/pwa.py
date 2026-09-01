@@ -9,11 +9,10 @@ that page. Serving a distinct name, icon and manifest per section therefore
 turns one "Add to Home Screen" per section into four separate app icons.
 
 The section is derived from the request path by the context processor below, so
-every page under /blog/ (including /blog/3/) carries the blog identity
-without each template having to declare it.
+every page under /blog/ (including /blog/3/ and the login page) carries the
+blog identity without each template having to declare it.
 """
 
-from django.contrib.auth.decorators import login_not_required
 from django.http import Http404, JsonResponse
 from django.templatetags.static import static
 from django.urls import reverse
@@ -95,14 +94,8 @@ def context(request):
     }
 
 
-@login_not_required
 def manifest(request, slug):
-    """Serves one section's web app manifest.
-
-    Exempt from the site-wide login wall along with the rest of the PWA
-    shell: it holds no user data, and a manifest that 302s to the login
-    page is not a manifest the browser can install from.
-    """
+    """Serves one section's web app manifest."""
     app = APPS.get(slug)
     if app is None:
         raise Http404(f"No PWA app named {slug!r}")
@@ -116,11 +109,11 @@ def manifest(request, slug):
         "name": app["name"],
         "short_name": app["short_name"],
         "start_url": start_url,
-        # Scope stays site-wide even for the section apps. Narrowing it to
-        # the section would look tidier but breaks them: every page redirects
-        # to /login/ once the session expires, and an out-of-scope redirect is
-        # kicked out into the browser. The first expired session would drop
-        # the user out of the app.
+        # Scope stays site-wide even for the section apps. Narrowing it to the
+        # section would look tidier but breaks them: /priorities/ and
+        # /blog/new/ redirect to the login page at /blog/login/, and an
+        # out-of-scope redirect is kicked out into the browser. The first
+        # expired session would drop the user out of the app.
         "scope": "/",
         "display": "standalone",
         "background_color": app["background_color"],

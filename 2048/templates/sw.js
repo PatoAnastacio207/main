@@ -9,7 +9,7 @@
  * and the site behaves exactly as it did before.
  */
 
-const VERSION = "v1";
+const VERSION = "v2";
 const SHELL_CACHE = `shell-${VERSION}`;
 const RUNTIME_CACHE = `runtime-${VERSION}`;
 
@@ -19,8 +19,8 @@ const OFFLINE_URL = "{% url 'offline' %}";
 const PRECACHE_URLS = [
     OFFLINE_URL,
     "{% static 'blog/blog.css' %}",
-    "{% static 'icons/icon-192.png' %}",
-    "{% static 'manifest.webmanifest' %}",
+    "{% static 'icons/home-192.png' %}",
+    "{% url 'pwa_manifest' 'home' %}",
 ];
 
 // Pages that must never be served from cache: they are authentication or
