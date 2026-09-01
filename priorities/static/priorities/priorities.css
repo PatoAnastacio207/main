@@ -1,0 +1,104 @@
+/* Task-specific pieces. The page shell, buttons and typography come from
+   blog/blog.css so /priorities matches /blog and /. */
+
+.add-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.add-form input[type="text"] {
+    flex: 1;
+    min-width: 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0 12px;
+    min-height: 44px;
+    color: var(--text);
+    font-family: inherit;
+    /* Must stay at 16px or iOS Safari zooms in on focus */
+    font-size: 16px;
+}
+
+.add-form input[type="text"]:focus {
+    border-color: var(--border-strong);
+    outline: none;
+}
+
+.task-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.task {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 8px 8px 14px;
+    border-bottom: 1px solid var(--border);
+}
+
+.task:last-child {
+    border-bottom: none;
+}
+
+.task-name {
+    flex: 1;
+    min-width: 0;
+    /* Long unbroken task names must not push the buttons off screen */
+    overflow-wrap: anywhere;
+}
+
+.task-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.task-actions form {
+    margin: 0;
+    display: flex;
+    gap: 4px;
+}
+
+.icon-btn {
+    /* Square 44px: the minimum comfortable tap target on a phone */
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.icon-btn:hover {
+    background: var(--text);
+    color: var(--bg);
+}
+
+.icon-btn:disabled {
+    opacity: 0.25;
+    cursor: default;
+}
+
+.icon-btn:disabled:hover {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.icon-btn.done {
+    border-color: var(--border-strong);
+    font-weight: 700;
+}

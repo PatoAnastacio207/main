@@ -43,6 +43,18 @@
                 </div>
             </a>
         </article>
+
+        {# Staff-only tool, so it is not advertised to visitors. #}
+        {% if user.is_staff %}
+            <article class="card">
+                <a class="card-link" href="{% url 'priorities:list' %}">
+                    <div class="card-body">
+                        <h2 class="card-title">Priorities</h2>
+                        <p class="card-summary">Lista de tareas pendientes.</p>
+                    </div>
+                </a>
+            </article>
+        {% endif %}
     </div>
 </main>
 

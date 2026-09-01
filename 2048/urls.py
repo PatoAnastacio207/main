@@ -27,6 +27,7 @@ urlpatterns = [
     path("blog/", include("blog.urls")),
     path("admin/", admin.site.urls),
     path("sensors/", include("sensors.urls")),
+    path("priorities/", include("priorities.urls")),
     path("", home, name="home"),
     # The service worker must be served from the site root: its scope is the
     # directory it is served from, so a copy under /static/ could only ever

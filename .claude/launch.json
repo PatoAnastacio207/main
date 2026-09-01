@@ -3,8 +3,14 @@
   "configurations": [
     {
       "name": "django-sensors",
-      "url": "http://localhost:8000",
-      "port": 8000
+      "url": "http://localhost:8001",
+      "port": 8001,
+      "runtimeExecutable": "./bin/python",
+      "runtimeArgs": [
+        "manage.py",
+        "runserver",
+        "0.0.0.0:8001"
+      ]
     }
   ]
 }
