@@ -1,0 +1,82 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="color-scheme" content="light">
+    <title>Priorities</title>
+    <link rel="stylesheet" href="{% static 'blog/blog.css' %}">
+    <link rel="stylesheet" href="{% static 'priorities/priorities.css' %}">
+    {% include "pwa_head.html" %}
+</head>
+<body>
+
+<header class="site-header">
+    <div class="header-inner">
+        <a class="brand" href="/">2048</a>
+        <nav class="header-actions">
+            <span class="user-chip">{{ user.get_username }}</span>
+            <form class="logout-form" method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button class="btn btn-ghost" type="submit">Log out</button>
+            </form>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <div class="page-head">
+        <h1>Priorities</h1>
+        <p class="page-sub">
+            {% if tasks %}
+                {{ tasks|length }} pending task{{ tasks|length|pluralize }}
+            {% else %}
+                Nothing pending
+            {% endif %}
+        </p>
+    </div>
+
+    <form class="add-form" method="post" action="{% url 'priorities:list' %}">
+        {% csrf_token %}
+        {{ form.name }}
+        <button class="btn btn-primary" type="submit">Add</button>
+    </form>
+
+    {% if form.name.errors %}
+        {% for error in form.name.errors %}
+            <p class="form-errors">{{ error }}</p>
+        {% endfor %}
+    {% endif %}
+
+    {% if tasks %}
+        <ul class="task-list">
+            {% for task in tasks %}
+                <li class="task">
+                    <span class="task-name">{{ task.name }}</span>
+
+                    <div class="task-actions">
+                        <form method="post" action="{% url 'priorities:action' task.pk %}">
+                            {% csrf_token %}
+                            <button class="icon-btn" type="submit" name="action" value="up"
+                                    title="Move up" aria-label="Move “{{ task.name }}” up"
+                                    {% if forloop.first %}disabled{% endif %}>&uarr;</button>
+                            <button class="icon-btn" type="submit" name="action" value="down"
+                                    title="Move down" aria-label="Move “{{ task.name }}” down"
+                                    {% if forloop.last %}disabled{% endif %}>&darr;</button>
+                            <button class="icon-btn done" type="submit" name="action" value="complete"
+                                    title="Mark as done" aria-label="Mark “{{ task.name }}” as done">&check;</button>
+                        </form>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="empty">
+            <p>No pending tasks.</p>
+        </div>
+    {% endif %}
+</main>
+
+</body>
+</html>
